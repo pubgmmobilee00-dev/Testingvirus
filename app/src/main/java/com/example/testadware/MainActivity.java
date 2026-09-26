@@ -2,44 +2,46 @@ package com.example.testadware;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.view.Gravity;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-@Override  
-protected void onCreate(Bundle savedInstanceState) {  
-    super.onCreate(savedInstanceState);  
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    LinearLayout layout = new LinearLayout(this);  
-    layout.setOrientation(LinearLayout.VERTICAL);  
-    layout.setGravity(Gravity.CENTER);  
-    layout.setPadding(30, 30, 30, 30);  
-    layout.setBackgroundColor(Color.WHITE);  
+        // Ekran düzenini yükle
+        // (Eğer bir layout dosyanız varsa setContentView kullanabilirsiniz)
+        
+        // Uygulamaya girildiğinde mesaj göster
+        showToast("⚠️ Adware Aşkarlandı!\nBu, yalnız TEST xəbərdarlığıdır.");
+    }
 
-    TextView title = new TextView(this);  
-    title.setText("⚠️ Adware aşkarlandı");  
-    title.setTextSize(28);  
-    title.setTypeface(null, Typeface.BOLD);  
-    title.setTextColor(Color.RED);  
-    title.setGravity(Gravity.CENTER);  
+    @Override
+    protected void onStop() {
+        super.onStop();
+        
+        // Uygulamadan çıkıldığında (arka plana alındığında) mesajı göster ve 10 saniye ekranda tut
+        showToastFor10Seconds("⚠️ Adware Aşkarlandı!\nBu, yalnız TEST xəbərdarlığıdır.");
+    }
 
-    TextView message = new TextView(this);  
-    message.setText(  
-        "\nBu, yalnız TEST xəbərdarlığıdır.\n\n" +  
-        "Həqiqi virus və ya adware yoxdur."  
-    );  
-    message.setTextSize(18);  
-    message.setTextColor(Color.DKGRAY);  
-    message.setGravity(Gravity.CENTER);  
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
-    layout.addView(title);  
-    layout.addView(message);  
-
-    setContentView(layout);  
-}
-
+    private void showToastFor10Seconds(final String message) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        
+        // 10 saniye boyunca arka arkaya kısa Toast mesajları tetikleyerek ekranda kalmasını sağlar
+        for (int i = 0; i < 5; i++) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            }, i * 2000); // Her 2 saniyede bir tekrarlar (Toplam ~10 saniye)
+        }
+    }
 }
