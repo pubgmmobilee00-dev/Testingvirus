@@ -1,32 +1,26 @@
-name: Build APK from Zip
+name: Build APK
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Unzip files
-        run: unzip -o test.virus.zip
-        
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-          
       - name: Build APK
         run: |
-          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -m -J java -M AndroidManifest.xml -S res -I $ANDROID_HOME/platforms/android-34/android.jar || true
-          javac -d bin -classpath $ANDROID_HOME/platforms/android-34/android.jar $(find . -name "*.java")
-          $ANDROID_HOME/build-tools/34.0.0/d8 --output . $(find bin -name "*.class")
-          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -M AndroidManifest.xml -S res -I $ANDROID_HOME/platforms/android-34/android.jar -F app-unsigned.apk .
+          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -m -J app/src/main/java -M app/src/main/AndroidManifest.xml -S app/src/main/res -I $ANDROID_HOME/platforms/android-34/android.jar
+          javac -d bin -classpath $ANDROID_HOME/platforms/android-34/android.jar $(find app/src/main/java -name "*.java")
+          $ANDROID_HOME/build-tools/34.0.0/d8 --output . bin/com/example/testadware/*.class
+          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -M app/src/main/AndroidManifest.xml -S app/src/main/res -I $ANDROID_HOME/platforms/android-34/android.jar -F app-unsigned.apk .
           $ANDROID_HOME/build-tools/34.0.0/zipalign -v 4 app-unsigned.apk app-aligned.apk
           keytool -genkey -v -keystore test.keystore -storepass password -alias alias_name -keypass password -dname "CN=Test" -keyalg RSA -keysize 2048 -validity 10000
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks test.keystore --ks-pass pass:password app-aligned.apk
-          mv app-aligned.apk test-app.apk
-          
+          mv app-aligned.apk test-adware.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: test-apk
-          path: test-app.apk
+          name: test-adware-apk
+          path: test-adware.apk
           
